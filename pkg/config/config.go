@@ -1,12 +1,12 @@
 package config
 
 import (
-	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
+
+	"gopkg.in/yaml.v2"
 )
 
 const configFileName = ".k8swatch.yaml"
@@ -19,7 +19,6 @@ type Resource struct {
 
 // Handler struct:
 type Handler struct {
-	Default Default `json:"default"`
 }
 
 // Config struct: k8swatch configuration
@@ -73,9 +72,7 @@ func (c *Config) Load() error {
 	}
 
 	if len(b) != 0 {
-		err = json.Unmarshal(b, c)
-		fmt.Printf("DEBUG: %+v\n", c)
-		return err
+		return yaml.Unmarshal(b, c)
 	}
 
 	return nil
@@ -92,8 +89,4 @@ func configDir() string {
 	}
 
 	return os.Getenv("HOME")
-}
-
-type Default struct {
-	ToScreen bool `json:"toScreen"`
 }
