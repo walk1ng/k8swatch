@@ -61,9 +61,6 @@ func Start(conf *config.Config, eventHandler handlers.Handler) {
 		clientset = utils.GetClient()
 	}
 
-	// queue
-	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
-
 	if conf.Resource.Pod {
 		informer := cache.NewSharedIndexInformer(
 			&cache.ListWatch{
@@ -79,7 +76,7 @@ func Start(conf *config.Config, eventHandler handlers.Handler) {
 			cache.Indexers{},
 		)
 
-		c := newController(clientset, queue, informer, eventHandler)
+		c := newController(clientset, informer, eventHandler, "pod")
 		stopCh := make(chan struct{})
 		defer close(stopCh)
 
@@ -93,8 +90,51 @@ func Start(conf *config.Config, eventHandler handlers.Handler) {
 
 }
 
-func newController(clientset kubernetes.Interface, queue workqueue.RateLimitingInterface, informer cache.SharedIndexInformer, eventHandler handlers.Handler) *Controller {
-	return nil
+func newController(clientset kubernetes.Interface, informer cache.SharedIndexInformer, eventHandler handlers.Handler, resourceType string) *Controller {
+	// queue
+	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+
+	var newEvent Event
+	var err error
+
+	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			newEvent.key, err = cache.MetaNamespaceKeyFunc(obj)
+			newEvent.eventType = "create"
+			newEvent.resourceType = resourceType
+			logrus.WithField("pkg", "k8swatch-"+resourceType).Infof("Processing add to %s: %s", resourceType, newEvent.key)
+			if err == nil {
+				queue.Add(newEvent)
+			}
+		},
+		UpdateFunc: func(old, new interface{}) {
+			newEvent.key, err = cache.MetaNamespaceKeyFunc(old)
+			newEvent.eventType = "update"
+			newEvent.resourceType = resourceType
+			logrus.WithField("pkg", "k8swatch-"+resourceType).Infof("Processing update to %s: %s", resourceType, newEvent.key)
+			if err == nil {
+				queue.Add(newEvent)
+			}
+		},
+		DeleteFunc: func(obj interface{}) {
+			newEvent.key, err = cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
+			newEvent.eventType = "delete"
+			newEvent.resourceType = resourceType
+			newEvent.namespace = utils.GetObjectMetaData(obj).Namespace
+			logrus.WithField("pkg", "k8swatch-"+resourceType).Infof("Processing delete to %s: %s", resourceType, newEvent.key)
+			if err == nil {
+				queue.Add(newEvent)
+			}
+		},
+	})
+
+	return &Controller{
+		logger:       logrus.WithField("pkg", "k8swatch-"+resourceType),
+		clientset:    clientset,
+		queue:        queue,
+		informer:     informer,
+		eventHandler: eventHandler,
+	}
 }
 
 // Run runs the controller
