@@ -16,6 +16,10 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"runtime"
 
 	"github.com/spf13/cobra"
 )
@@ -31,7 +35,18 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("view called")
+		fmt.Println("View the content of .k8swatch.yaml:")
+		watchConfigPath := ".k8swatch.yaml"
+		if runtime.GOOS == "windows" {
+			watchConfigPath = filepath.Join(os.Getenv("USERPROFILE"), watchConfigPath)
+		} else {
+			watchConfigPath = filepath.Join(os.Getenv("HOME"), watchConfigPath)
+		}
+		configFile, err := ioutil.ReadFile(watchConfigPath)
+		if err != nil {
+			fmt.Printf("Failed to view .k8swatch.yaml: %v\n", err)
+		}
+		fmt.Println(string(configFile))
 	},
 }
 
