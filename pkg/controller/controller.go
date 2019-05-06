@@ -176,7 +176,7 @@ func (c *Controller) processNextItem() bool {
 
 	defer c.queue.Done(newEvent)
 	err := c.processItem(newEvent.(Event))
-	if err != nil {
+	if err == nil {
 		c.queue.Forget(newEvent)
 	} else if c.queue.NumRequeues(newEvent) < maxRetries {
 		c.logger.Errorf("Error processing %s (will retry): %v", newEvent.(Event).key, err)
