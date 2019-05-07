@@ -60,7 +60,7 @@ func (c *Config) Load() error {
 		return err
 	}
 
-	configFile := filepath.Join(configDir(), configFileName)
+	configFile := getConfigFile()
 	file, err := os.Open(configFile)
 	if err != nil {
 		return err
@@ -77,6 +77,28 @@ func (c *Config) Load() error {
 
 	return nil
 
+}
+
+func (c *Config) Write() error {
+	b, err := yaml.Marshal(c)
+	if err != nil {
+		return nil
+	}
+
+	err = ioutil.WriteFile(getConfigFile(), b, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+func getConfigFile() string {
+	configFile := filepath.Join(configDir(), configFileName)
+	if _, err := os.Stat(configFile); err == nil {
+		return configFile
+	}
+	return ""
 }
 
 func configDir() string {
