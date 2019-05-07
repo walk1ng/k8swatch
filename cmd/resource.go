@@ -74,6 +74,50 @@ func manageResource(operation string, cmd *cobra.Command, config *config.Config)
 			"po",
 			&config.Resource.Pod,
 		},
+		{
+			"deploy",
+			&config.Resource.Service,
+		},
+		{
+			"rc",
+			&config.Resource.ReplicationController,
+		},
+		{
+			"rs",
+			&config.Resource.ReplicaSet,
+		},
+		{
+			"ds",
+			&config.Resource.DaemonSet,
+		},
+		{
+			"svc",
+			&config.Resource.Service,
+		},
+		{
+			"job",
+			&config.Resource.Job,
+		},
+		{
+			"pv",
+			&config.Resource.PersistentVolume,
+		},
+		{
+			"ns",
+			&config.Resource.Namespace,
+		},
+		{
+			"secret",
+			&config.Resource.Secret,
+		},
+		{
+			"cm",
+			&config.Resource.ConfigMap,
+		},
+		{
+			"ing",
+			&config.Resource.Ingress,
+		},
 	}
 
 	for _, flag := range flags {
@@ -108,16 +152,18 @@ func init() {
 		resourceRemoveCmd,
 	)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// resourceCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// resourceCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
 	// resource flags as PersistentFlags to resourceCmd
-	resourceCmd.PersistentFlags().Bool("po", false, "watch for pods")
+	resourceCmd.PersistentFlags().Bool("po", false, "watch for Pods")
+	resourceCmd.PersistentFlags().Bool("deploy", false, "watch for Deployments")
+	resourceCmd.PersistentFlags().Bool("rc", false, "watch for ReplicationControllers")
+	resourceCmd.PersistentFlags().Bool("rs", false, "watch for ReplicaSets")
+	resourceCmd.PersistentFlags().Bool("ds", false, "watch for DaemonSets")
+	resourceCmd.PersistentFlags().Bool("svc", false, "watch for Services")
+	resourceCmd.PersistentFlags().Bool("job", false, "watch for Jobs")
+	resourceCmd.PersistentFlags().Bool("pv", false, "watch for PersistentVolumes")
+	resourceCmd.PersistentFlags().Bool("ns", false, "watch for Namespaces")
+	resourceCmd.PersistentFlags().Bool("secret", false, "watch for Secrets")
+	resourceCmd.PersistentFlags().Bool("cm", false, "watch for ConfigMaps")
+	resourceCmd.PersistentFlags().Bool("ing", false, "watch for Ingresses")
+
 }

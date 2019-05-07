@@ -13,8 +13,18 @@ const configFileName = ".k8swatch.yaml"
 
 // Resource struct: resource configuration
 type Resource struct {
-	Pod bool `json:"po"`
-	// will add other resources later
+	Pod                   bool `json:"po"`
+	Deployment            bool `json:"deploy"`
+	ReplicationController bool `json:"rc"`
+	ReplicaSet            bool `json:"rs"`
+	DaemonSet             bool `json:"ds"`
+	Service               bool `json:"svc"`
+	Job                   bool `json:"job"`
+	PersistentVolume      bool `json:"pv"`
+	Namespace             bool `json:"ns"`
+	Secret                bool `json:"secret"`
+	ConfigMap             bool `json:"configmap"`
+	Ingress               bool `json:"ing"`
 }
 
 // Handler struct:
